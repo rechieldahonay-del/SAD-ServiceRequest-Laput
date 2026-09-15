@@ -34,7 +34,7 @@ if (loginForm) {
 
         loginMessage.textContent = "Login successful!";
 
-        window.location.href = "index.html";
+        window.location.href = "dashboard.html";
     });
 }
 
@@ -45,93 +45,36 @@ if (loginForm) {
 
 if (registerBtn) {
 
-    registerBtn.addEventListener("click", (event) => {
+    registerBtn.addEventListener("click", async (event) => {
 
         event.preventDefault();
 
-        // Show the registration modal
-        const registerModal = document.getElementById("registerModal");
-        if (registerModal) {
-            registerModal.style.display = "flex";
-        }
-    });
-}
+        const email = prompt("Enter your email:");
+        const password = prompt("Create a password:");
 
-// Handle registration form submission
-const registerForm = document.getElementById("registerForm");
-if (registerForm) {
-    registerForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        const registerEmail = document.getElementById("registerEmail").value.trim();
-        const registerPassword = document.getElementById("registerPassword").value;
-        const registerConfirmPassword = document.getElementById("registerConfirmPassword").value;
-        const registerMessage = document.getElementById("registerMessage");
-
-        // Validation
-        if (!registerEmail || !registerPassword) {
-            registerMessage.textContent = "Please fill in all fields";
-            registerMessage.style.color = "red";
+        if (!email || !password) {
             return;
         }
-
-        if (registerPassword !== registerConfirmPassword) {
-            registerMessage.textContent = "Passwords do not match";
-            registerMessage.style.color = "red";
-            return;
-        }
-
-        if (registerPassword.length < 6) {
-            registerMessage.textContent = "Password must be at least 6 characters";
-            registerMessage.style.color = "red";
-            return;
-        }
-
-        registerMessage.textContent = "Creating account...";
-        registerMessage.style.color = "#666";
 
         const { data, error } =
             await supabaseClient.auth.signUp({
-                email: registerEmail,
-                password: registerPassword
+                email: email,
+                password: password
             });
 
         if (error) {
-            registerMessage.textContent = "Registration failed: " + error.message;
-            registerMessage.style.color = "red";
+
+            alert(
+                "Registration failed:\n" +
+                error.message
+            );
+
             return;
         }
 
-        registerMessage.textContent = "Account created successfully! Check your email to confirm.";
-        registerMessage.style.color = "green";
-
-        // Clear form
-        setTimeout(() => {
-            registerForm.reset();
-            closeRegisterModal();
-        }, 2000);
-    });
-}
-
-// Close registration modal
-const closeRegisterBtn = document.getElementById("closeRegisterBtn");
-if (closeRegisterBtn) {
-    closeRegisterBtn.addEventListener("click", closeRegisterModal);
-}
-
-function closeRegisterModal() {
-    const registerModal = document.getElementById("registerModal");
-    if (registerModal) {
-        registerModal.style.display = "none";
-    }
-}
-
-// Close modal when clicking outside
-const registerModal = document.getElementById("registerModal");
-if (registerModal) {
-    registerModal.addEventListener("click", (event) => {
-        if (event.target === registerModal) {
-            closeRegisterModal();
-        }
+        alert(
+            "Account created successfully!\n\n" +
+            "Check your email if email confirmation is enabled."
+        );
     });
 }
