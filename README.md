@@ -1,368 +1,145 @@
-# ICT Service Request Management System
+# Laboratory Asset and Service Management System
 
-## Project Name
+A role-based laboratory system for equipment, borrowing, returns, maintenance, and audit tracking. It uses Supabase Authentication, PostgreSQL, Row Level Security, and protected workflow functions.
 
-**SAD-ServiceRequest-laput**
+## Roles
 
-## Description
+| Role | Permissions |
+| --- | --- |
+| Administrator | Manage users and equipment; approve/reject requests; manage maintenance; view audit logs |
+| Laboratory Staff | View equipment; release approved requests; process returns; update permitted maintenance records |
+| Requester / Viewer | View available equipment; submit borrowing and maintenance requests; view own history |
 
-The **ICT Service Request Management System** is a web-based system designed to help users submit and manage ICT-related service requests.
-
-Users can create a service request by providing their name, department, category, description, and priority. The system uses **Supabase** for authentication and database storage.
+The interface hides restricted sections, while RLS policies and database functions enforce permissions at database level.
 
 ## Features
 
-* User Registration
-* User Login
-* User Logout
-* Create Service Request
-* View Service Requests
-* Edit Service Request
-* Delete Service Request
-* Refresh Service Requests
-* Priority Selection
-* Request Status
-* Supabase Database Integration
-* Row Level Security (RLS)
+- Role-aware dashboard navigation
+- Equipment register and availability status
+- Borrowing approval workflow
+- Release, return, overdue, and close controls
+- Maintenance request tracking
+- Audit trail for sensitive operations
+- Admin user invites and pending-account approval
+- Responsive simple interface
 
-## Technologies Used
+## Borrowing Workflow
 
-* HTML5
-* CSS3
-* JavaScript
-* Supabase
-* VS Code
-* Live Server
+```text
+Submitted -> Pending -> Approved / Rejected
+Approved -> Released -> Returned -> Closed
+Released past due date -> Overdue -> Returned -> Closed
+```
+
+Required statuses are `Pending`, `Approved`, `Rejected`, `Released`, `Returned`, `Overdue`, and `Closed`.
+
+Business rules are enforced in Supabase:
+
+- Only available equipment may be requested.
+- Equipment under maintenance cannot be borrowed.
+- Only administrators may approve or reject.
+- Rejected requests cannot be released.
+- Only approved requests may be released.
+- Released equipment becomes borrowed.
+- Good returns become available; damaged returns become maintenance.
+- Returned requests cannot be processed twice.
+- Sensitive actions are written to `audit_logs`.
 
 ## Project Structure
 
 ```text
-SAD-ServiceRequest-Montero/
-│
-├── index.html
-├── login.html
-│
-├── css/
-│   └── style.css
-│
-├── js/
-│   ├── supabase.js
-│   ├── auth.js
-│   └── app.js
-│
-└── README.md
+index.html                 Entry redirect to the dashboard
+dashboard.html             Role-aware laboratory dashboard
+login.html                 Supabase login and registration
+supabase_schema.sql        Tables, RLS policies, triggers, and workflow RPCs
+
+css/style.css              Shared and login styles
+css/dashboard.css          Dashboard styles
+
+js/supabase.js             Supabase client setup
+js/auth.js                 Login and registration logic
+js/dashboard.js            Dashboard navigation and workflow logic
+
+actor-diagram.svg          Role and permission diagram
+use-case-diagram.svg       Laboratory workflow use cases
+erd-diagram.svg            Laboratory database relationships
+SAD-analysis.md            Short system analysis
+README.md                  Project documentation
 ```
 
-## Database
+## Database Tables
 
-The system uses a Supabase table named:
+- `profiles`: user name, role, and account status (`Pending`, `Approved`, or `Rejected`)
+- `user_invites`: administrator-created email and role invitations
+- `equipment`: laboratory asset register and status
+- `borrowing_requests`: borrowing workflow and transaction state
+- `maintenance_requests`: equipment issues and maintenance state
+- `audit_logs`: action, module, record, description, user, and timestamp
+- `service_requests`: legacy ICT request table retained for compatibility
 
-```text
-service_requests
-```
+## Setup
 
-The table contains the following fields:
+1. Open the project folder in VS Code.
+2. Run `supabase_schema.sql` completely in the Supabase SQL Editor.
+3. Confirm Supabase Authentication email login is enabled.
+4. Start the project with Live Server.
+5. Open `login.html`.
+6. Register or log in.
 
-| Field          | Type        | Description                  |
-| -------------- | ----------- | ---------------------------- |
-| id             | BIGINT      | Unique request ID            |
-| requester_name | TEXT        | Name of the requester        |
-| department     | TEXT        | Requester's department       |
-| category       | TEXT        | ICT request category         |
-| description    | TEXT        | Description of the problem   |
-| priority       | TEXT        | Request priority             |
-| status         | TEXT        | Current request status       |
-| created_at     | TIMESTAMPTZ | Date and time created        |
-| user_id        | UUID        | ID of the authenticated user |
+Administrators can add a user invite from **Users**. The invited person must
+register using the invited email. The new account appears as `Pending`; an
+administrator must select **Accept** before that user can open the dashboard.
+Rejected accounts remain blocked.
 
-## Request Categories
-
-The system supports the following categories:
-
-* Hardware
-* Software
-* Network
-* Account
-* Other
-
-## Priority Levels
-
-The available priority levels are:
-
-* Low
-* Medium
-* High
-* Urgent
-
-## Request Status
-
-The system uses the following request statuses:
-
-* Pending
-* In Progress
-* Completed
-* Cancelled
-
-## Supabase Configuration
-
-The Supabase project is connected through:
+The Supabase project URL must be the base URL, without `/rest/v1/`:
 
 ```javascript
-const SUPABASE_URL =
-    "https://mtvrykvffbudxcvvscel.supabase.co";
-
-const SUPABASE_KEY =
-    "sb_publishable_bdCD5Ne8q_gWX9-KELl1Zw_X5QpxpMC";
+const SUPABASE_URL = "https://your-project-id.supabase.co";
 ```
 
-The URL used by `supabase.js` should be the main Supabase project URL.
+## Assign Roles
 
-Do **not** add `/rest/v1` to the URL when using `supabase.createClient()`.
+New users are created as `requester`. Promote a user in the Supabase SQL Editor:
 
-Example:
-
-```javascript
-const supabaseClient = supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
+```sql
+update public.profiles
+set role = 'admin', account_status = 'Approved'
+where id = (
+    select id from auth.users where email = 'admin@example.com'
 );
 ```
 
-## Database Setup
+For laboratory staff:
 
-1. Open your Supabase project.
-2. Go to **SQL Editor**.
-3. Create a new SQL query.
-4. Paste the database SQL code.
-5. Click **Run**.
-6. Check **Table Editor**.
-7. Look for the `service_requests` table.
-
-The system uses Row Level Security (RLS) to control access to service requests.
-
-## How to Run the Project
-
-### Step 1: Open the Project
-
-Open the `SAD-ServiceRequest-Montero` folder in **Visual Studio Code**.
-
-### Step 2: Install Live Server
-
-Install the **Live Server** extension in VS Code.
-
-### Step 3: Start the System
-
-Right-click:
-
-```text
-login.html
+```sql
+update public.profiles
+set role = 'staff', account_status = 'Approved'
+where id = (
+    select id from auth.users where email = 'staff@example.com'
+);
 ```
 
-Then select:
+Sign out and sign in again after changing a role.
 
-```text
-Open with Live Server
-```
+## Functional Tests
 
-The system will open in your browser.
-
-Example:
-
-```text
-http://127.0.0.1:5500/login.html
-```
-
-### Step 4: Create an Account
-
-On the login page, click:
-
-```text
-Create Account
-```
-
-Enter an email and password.
-
-If email confirmation is enabled in Supabase, check the email and confirm the account.
-
-### Step 5: Login
-
-Enter the registered email and password, then click:
-
-```text
-Login
-```
-
-After successful login, the system will open the Service Request page.
-
-### Step 6: Create a Service Request
-
-Fill in:
-
-* Requester Name
-* Department
-* Category
-* Description
-* Priority
-
-Then click:
-
-```text
-Submit Request
-```
-
-The request will be saved in the Supabase database.
-
-## CRUD Operations
-
-The system supports basic CRUD operations:
-
-### Create
-
-Users can create a new ICT service request.
-
-### Read
-
-Users can view existing service requests.
-
-### Update
-
-Users can edit the description of their own service request.
-
-### Delete
-
-Users can delete their own service request.
-
-## Security
-
-The system uses **Supabase Authentication** for user login and registration.
-
-Row Level Security (RLS) is enabled on the `service_requests` table.
-
-Users can only update or delete requests associated with their own account.
-
-The browser uses a **Supabase publishable key**. A Supabase secret/service-role key should never be placed in frontend JavaScript.
-
-## Troubleshooting
-
-### Login does not work
-
-Check the following:
-
-1. Supabase Authentication is enabled.
-2. Email provider is enabled.
-3. The user account exists in Supabase.
-4. The email and password are correct.
-5. `js/supabase.js` contains the correct project URL and publishable key.
-
-### Service requests are not loading
-
-Check:
-
-1. The `service_requests` table exists.
-2. The SQL setup was successfully executed.
-3. RLS policies were created.
-4. The user is logged in.
-5. The browser Console for JavaScript errors.
-
-### "Failed to fetch" error
-
-Check your internet connection and make sure the Supabase project URL is correct.
-
-The URL should look like:
-
-```text
-https://your-project-id.supabase.co
-```
-
-Do not use:
-
-```text
-https://your-project-id.supabase.co/rest/v1/
-```
-
-inside `supabase.createClient()`.
-
-## Project Purpose
-
-This project demonstrates how a web-based ICT Service Request Management System can be developed using HTML, CSS, JavaScript, and Supabase.
-
-It provides a simple way for users to submit, view, update, and delete ICT service requests while using authentication and database security.
-
-## Author
-
-**Rechiel Laput**
-
-## Project Type
-
-**Service Request Management System**
-
-## Development Tools
-
-**Visual Studio Code + Supabase + Live Server**
-
-# SAD Analysis
-
-## 1. Problem Statement
-
-ICT service requests are often received through informal messages or verbal reports, making them difficult to track, search, update, and resolve. The ICT Service Request System provides one authenticated location where users can submit requests, view records, update details, delete requests, and monitor request status. This improves organization, visibility, and accountability in handling ICT support concerns.
-
-## 2. Actor
-
-**Primary actor:** System User / ICT Personnel
-
-The authenticated user interacts with the system to create and manage ICT service requests.
-
-![Primary Actor](<img width="497" height="352" alt="image" src="https://github.com/user-attachments/assets/81817aa4-8b85-485d-b7c2-649ab4429906" />
-)
-
-## 3. Use Case Diagram
-
-![Use Case Diagram](<img width="1200" height="760" alt="image" src="https://github.com/user-attachments/assets/ccf479f0-c74d-41d5-9b26-6b71f609764b" />
-)
-
-The primary actor can:
-
-- Login
-- View Dashboard
-- Create Request
-- View Requests
-- Search Request
-- Filter Requests
-- Update Request
-- Delete Request
-- Logout
-
-## 4. Simple ERD
-
-![Entity Relationship Diagram](erd-diagram.svg)
-
-### Relationship
-
-One authenticated **USER** can create many **SERVICE_REQUEST** records.
-
-```text
-USER (1) -------------- creates -------------- (M) SERVICE_REQUEST
-```
-
-### USER
-
-| Field | Description |
+| Test | Expected result |
 | --- | --- |
-| `user_id` | UUID primary key from Supabase Auth |
-| `email` | Authenticated user's email |
+| Viewer opens admin section | Section is hidden or access is denied |
+| Staff submits request | Request is saved as Pending |
+| Administrator approves | Status becomes Approved and audit entry is created |
+| Administrator rejects | Status becomes Rejected |
+| Release rejected request | Operation is blocked |
+| Release approved request | Status becomes Released and equipment becomes Borrowed |
+| Return released equipment | Equipment becomes Available or Maintenance if damaged |
+| View audit logs | Approval and transaction actions are visible to administrators |
+| Staff attempts restricted delete | Operation is blocked |
+| Logout and open dashboard | User is redirected to login |
 
-### SERVICE_REQUEST
+## Documentation
 
-| Field | Description |
-| --- | --- |
-| `id` | BIGINT primary key |
-| `requester_name` | Name of the requester |
-| `department` | Requester's department |
-| `category` | ICT request category |
-| `description` | Details of the concern |
-| `priority` | Low, Medium, High, or Urgent |
-| `status` | Pending, In Progress, Completed, or Cancelled |
-| `created_at` | Date and time the request was created |
-| `user_id` | UUID foreign key referencing the authenticated user |
-
-The ERD corresponds to the Supabase `service_requests` table used by the application.
+- [Actor diagram](actor-diagram.svg)
+- [Use-case diagram](use-case-diagram.svg)
+- [ERD](erd-diagram.svg)
+- [SAD analysis](SAD-analysis.md)
+- [Supabase schema](supabase_schema.sql)

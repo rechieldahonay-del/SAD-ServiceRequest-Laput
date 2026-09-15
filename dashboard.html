@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Asset and Service Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <header class="header app-header">
+        <div>
+            <p class="eyebrow">LABORATORY OPERATIONS</p>
+            <h1>Asset and Service Management</h1>
+            <p>Equipment, borrowing, returns, maintenance, and accountability.</p>
+        </div>
+        <div class="header-actions">
+            <span id="roleBadge" class="role-badge">Loading role...</span>
+            <button id="logoutBtn" class="btn-danger" type="button">Logout</button>
+        </div>
+    </header>
+
+    <main class="container app-shell">
+        <nav id="mainNav" class="app-nav" aria-label="Main navigation">
+            <button class="nav-button active" data-view="overview">Overview</button>
+            <button class="nav-button" data-view="borrowing">Borrowing</button>
+            <button class="nav-button" data-view="equipment">Equipment</button>
+            <button class="nav-button" data-view="maintenance">Maintenance</button>
+            <button class="nav-button" data-view="audit">Audit logs</button>
+            <button class="nav-button" data-view="users">Users</button>
+        </nav>
+
+        <p id="globalMessage" class="notice" aria-live="polite"></p>
+
+        <section id="overviewView" class="view-panel">
+            <div class="section-heading">
+                <div><p class="eyebrow">CONTROL CENTER</p><h2>Laboratory pulse</h2></div>
+                <button id="refreshOverviewBtn" class="btn-secondary" type="button">Refresh</button>
+            </div>
+            <div id="summaryGrid" class="summary-grid"></div>
+            <div class="split-grid">
+                <section class="card compact-card"><h3>Recent borrowing activity</h3><div id="recentBorrowingList" class="activity-list"></div></section>
+                <section class="card compact-card"><h3>What you can do</h3><div id="roleCapabilities" class="capability-list"></div></section>
+            </div>
+        </section>
+
+        <section id="borrowingView" class="view-panel hidden">
+            <div class="section-heading"><div><p class="eyebrow">TRANSACTIONS</p><h2>Borrowing requests</h2><p class="muted">Requests move through Pending, Approved, Rejected, Released, Returned, Overdue, and Closed controls.</p></div><label class="compact-filter">Status<select id="borrowingStatusFilter"><option value="">All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Released</option><option>Returned</option><option>Overdue</option><option>Closed</option></select></label></div>
+            <section id="borrowingFormCard" class="card form-card"><h3>Submit a borrowing request</h3>
+                <form id="borrowingForm" class="form-grid">
+                    <label>Equipment<select id="borrowingEquipment" required></select></label>
+                    <label>Return due date<input id="borrowingDueAt" type="datetime-local" required></label>
+                    <label class="full-width">Purpose<textarea id="borrowingPurpose" rows="3" required placeholder="Why is this equipment needed?"></textarea></label>
+                    <button id="submitBorrowingBtn" class="btn-primary" type="submit">Submit for approval</button>
+                </form>
+            </section>
+            <section class="card table-card"><div class="section-heading small-heading"><h3>Request history</h3><span id="borrowingCount" class="muted"></span></div><div class="table-wrap"><table><thead><tr><th>Equipment</th><th>Requester</th><th>Due</th><th>Status</th><th>Actions</th></tr></thead><tbody id="borrowingTableBody"></tbody></table></div></section>
+        </section>
+
+        <section id="equipmentView" class="view-panel hidden">
+            <div class="section-heading"><div><p class="eyebrow">ASSET REGISTER</p><h2>Equipment</h2></div></div>
+            <section id="equipmentFormCard" class="card form-card admin-only"><h3>Add equipment</h3>
+                <form id="equipmentForm" class="form-grid">
+                    <label>Asset code<input id="assetCode" required placeholder="LAP-003"></label>
+                    <label>Equipment name<input id="equipmentName" required placeholder="Laboratory laptop"></label>
+                    <label>Category<input id="equipmentCategory" required placeholder="Computer"></label>
+                    <label>Location<input id="equipmentLocation" placeholder="ICT Room"></label>
+                    <label class="full-width">Description<textarea id="equipmentDescription" rows="2"></textarea></label>
+                    <button id="addEquipmentBtn" class="btn-primary" type="submit">Add equipment</button>
+                </form>
+            </section>
+            <section class="card table-card"><div class="table-wrap"><table><thead><tr><th>Asset</th><th>Name</th><th>Category</th><th>Location</th><th>Status</th><th>Manage</th></tr></thead><tbody id="equipmentTableBody"></tbody></table></div></section>
+        </section>
+
+        <section id="maintenanceView" class="view-panel hidden">
+            <div class="section-heading"><div><p class="eyebrow">SERVICE DESK</p><h2>Maintenance</h2></div></div>
+            <section class="card form-card"><h3>Submit maintenance request</h3>
+                <form id="maintenanceForm" class="form-grid">
+                    <label>Equipment<select id="maintenanceEquipment" required></select></label>
+                    <label class="full-width">Issue<textarea id="maintenanceIssue" rows="3" required placeholder="Describe the problem"></textarea></label>
+                    <button class="btn-primary" type="submit">Submit maintenance request</button>
+                </form>
+            </section>
+            <section class="card table-card"><div class="table-wrap"><table><thead><tr><th>Equipment</th><th>Issue</th><th>Requester</th><th>Status</th><th>Manage</th></tr></thead><tbody id="maintenanceTableBody"></tbody></table></div></section>
+        </section>
+
+        <section id="auditView" class="view-panel hidden admin-only">
+            <div class="section-heading"><div><p class="eyebrow">ACCOUNTABILITY</p><h2>Audit logs</h2><p class="muted">Critical workflow actions are recorded by the database.</p></div></div>
+            <section class="card table-card"><div class="table-wrap"><table><thead><tr><th>When</th><th>Action</th><th>Module</th><th>Record</th><th>Description</th></tr></thead><tbody id="auditTableBody"></tbody></table></div></section>
+        </section>
+
+        <section id="usersView" class="view-panel hidden admin-only">
+            <div class="section-heading"><div><p class="eyebrow">ACCESS CONTROL</p><h2>Users and roles</h2><p class="muted">Add an invite, then approve the account after registration.</p></div></div>
+            <section class="card form-card">
+                <h3>Add user invite</h3>
+                <form id="userInviteForm" class="form-grid">
+                    <label>Email<input id="inviteEmail" type="email" required placeholder="user@example.com"></label>
+                    <label>Role<select id="inviteRole"><option value="requester">Requester / Viewer</option><option value="staff">Laboratory Staff</option><option value="admin">Administrator</option></select></label>
+                    <button class="btn-primary" type="submit">Add user</button>
+                </form>
+            </section>
+            <section class="card table-card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>User ID</th><th>Role</th><th>Account status</th><th>Created</th><th>Action</th></tr></thead><tbody id="usersTableBody"></tbody></table></div></section>
+            <section class="card table-card"><div class="section-heading small-heading"><h3>Pending invites</h3></div><div class="table-wrap"><table><thead><tr><th>Email</th><th>Requested role</th><th>Status</th><th>Created</th></tr></thead><tbody id="invitesTableBody"></tbody></table></div></section>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

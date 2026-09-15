@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+  <rect width="1200" height="720" fill="white"/>
+  <text x="600" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#17251f">Laboratory System Actors</text>
+  <text x="600" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#66736d">Roles and permitted functions</text>
+  <rect x="360" y="105" width="790" height="545" rx="12" fill="#f8faf8" stroke="#17251f" stroke-width="3"/>
+  <text x="755" y="143" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#17251f">Laboratory Asset and Service Management</text>
+  <g font-family="Arial, sans-serif" fill="#17251f">
+    <rect x="410" y="180" width="330" height="125" rx="8" fill="#e5f2ed" stroke="#2f6b52" stroke-width="2"/>
+    <text x="575" y="213" text-anchor="middle" font-size="20" font-weight="bold" fill="#174f4b">Administrator</text>
+    <text x="430" y="242" font-size="16">Manage users and equipment</text>
+    <text x="430" y="267" font-size="16">Approve or reject requests</text>
+    <text x="430" y="292" font-size="16">Review maintenance and audit logs</text>
+    <rect x="780" y="180" width="330" height="125" rx="8" fill="#fff1d9" stroke="#c8872f" stroke-width="2"/>
+    <text x="945" y="213" text-anchor="middle" font-size="20" font-weight="bold" fill="#8a5a11">Laboratory Staff</text>
+    <text x="800" y="242" font-size="16">View available equipment</text>
+    <text x="800" y="267" font-size="16">Release and return equipment</text>
+    <text x="800" y="292" font-size="16">Update permitted maintenance records</text>
+    <rect x="410" y="355" width="330" height="125" rx="8" fill="#edf1f6" stroke="#61758c" stroke-width="2"/>
+    <text x="575" y="388" text-anchor="middle" font-size="20" font-weight="bold" fill="#445a6d">Requester / Viewer</text>
+    <text x="430" y="417" font-size="16">View available equipment</text>
+    <text x="430" y="442" font-size="16">Submit borrowing and maintenance requests</text>
+    <text x="430" y="467" font-size="16">View own history</text>
+    <rect x="780" y="355" width="330" height="125" rx="8" fill="#f8e5e2" stroke="#a4443d" stroke-width="2"/>
+    <text x="945" y="388" text-anchor="middle" font-size="20" font-weight="bold" fill="#8d3833">System Controls</text>
+    <text x="800" y="417" font-size="16">RLS policies enforce access</text>
+    <text x="800" y="442" font-size="16">Workflow functions enforce states</text>
+    <text x="800" y="467" font-size="16">Audit trail records critical actions</text>
+  </g>
+  <g stroke="#2f6b52" stroke-width="3" fill="none"><line x1="300" y1="220" x2="410" y2="220"/><line x1="300" y1="410" x2="410" y2="410"/></g>
+  <g stroke="#17251f" stroke-width="4" fill="none"><circle cx="145" cy="180" r="24"/><line x1="145" y1="204" x2="145" y2="280"/><line x1="145" y1="225" x2="100" y2="255"/><line x1="145" y1="225" x2="190" y2="255"/><line x1="145" y1="280" x2="108" y2="335"/><line x1="145" y1="280" x2="182" y2="335"/></g>
+  <text x="145" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#17251f">Authorized</text>
+  <text x="145" y="394" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#17251f">roles</text>
+</svg>
